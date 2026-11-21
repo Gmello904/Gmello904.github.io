@@ -1,0 +1,14 @@
+{
+  "name": "mellow-agent",
+  "version": "1.0.0",
+  "description": "Describe a business in plain words and get a ready-to-test AI customer-service agent.",
+  "type": "module",
+  "scripts": { "start": "node server.js", "dev": "node --watch server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^4.22.3",
+    "google-auth-library": "^11.3.4",
+    "groq-sdk": "^1.6.0"
+  }
+}
