@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Chat</title>
+<script src="/icons.js"></script>
+<style>
+:root{--bg:#fff;--log:#f2f6f9;--bubble:#fff;--ink:#14232b;--line:#dfe6ee;--mute:#8a99a5;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#111a24;--log:#0b121a;--bubble:#182230;--ink:#e8eff6;--line:#243142;--mute:#7f91a3;color-scheme:dark}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{display:flex;flex-direction:column;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg)}
+header{display:flex;align-items:center;gap:10px;padding:14px 16px;color:#fff;background:var(--c,#0b86b8)}
+.av{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center}
+header b{display:block;line-height:1.2}header small{opacity:.85}
+#log{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:8px;background:var(--log)}
+.b{max-width:84%;padding:8px 12px;border-radius:14px;background:var(--bubble);border:1px solid var(--line);white-space:pre-wrap}
+.b.u{align-self:flex-end;background:var(--c,#0b86b8);border-color:var(--c,#0b86b8);color:#fff}
+form{display:flex;gap:8px;padding:10px;border-top:1px solid var(--line);background:var(--bg)}
+input{flex:1;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:10px 14px}
+button{font:inherit;border:0;border-radius:99px;padding:0 18px;color:#fff;background:var(--c,#0b86b8);cursor:pointer}
+button:disabled{opacity:.6}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.chips button{background:var(--bg);color:var(--c,#0b86b8);border:1px solid var(--c,#0b86b8);padding:6px 12px;font-size:13px}
+footer{text-align:center;font-size:11px;color:var(--mute);padding:0 0 8px;background:var(--bg)}
+</style></head><body>
+<header><div class="av" id="av"></div><div><b id="nm">Chat</b><small id="bz"></small></div></header>
+<div id="log" aria-live="polite"></div>
+<form id="f"><input id="m" placeholder="Type your message…" aria-label="Message" autocomplete="off"><button id="s">Send</button></form>
+<footer id="ft">Powered by Mellow Agent</footer>
+<script>
+const API=window.MA_API||"",id=window.MA_ID||location.pathname.split("/").pop(),$=s=>document.querySelector(s);let hist=[],greet="Hello!",starters=[];const convId=Math.random().toString(36).slice(2)+Date.now().toString(36);
+function draw(){const l=$("#log");l.innerHTML="";[{role:"assistant",content:greet},...hist].forEach(m=>{const d=document.createElement("div");d.className="b"+(m.role==="user"?" u":"");d.textContent=m.content||"…";l.appendChild(d)});if(!hist.length&&starters.length){const w=document.createElement("div");w.className="chips";starters.forEach(s=>{const b=document.createElement("button");b.type="button";b.textContent=s;b.onclick=()=>{$("#m").value=s;$("#f").requestSubmit()};w.appendChild(b)});l.appendChild(w)}
+l.scrollTop=l.scrollHeight}
+fetch(API+"/api/public/"+id).then(r=>r.ok?r.json():Promise.reject()).then(a=>{$("#nm").textContent=a.name||"Chat";$("#bz").textContent=a.business||"";$("#av").innerHTML=icon(a.icon||"chat",20);$("#ft").hidden=a.branding===false;document.title=(a.business||"Chat");document.documentElement.style.setProperty("--c",a.color||"#1f4e5f");greet=a.greeting||greet;starters=a.starters||[];draw()}).catch(()=>{$("#log").textContent="This chat is not available."; $("#f").hidden=true});
+$("#f").onsubmit=async e=>{e.preventDefault();const t=$("#m").value.trim();if(!t)return;$("#m").value="";$("#s").disabled=true;hist.push({role:"user",content:t},{role:"assistant",content:""});draw();
+ try{const r=await fetch(API+"/api/public/"+id+"/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({convId,messages:hist.slice(0,-1)})});
+  if(!r.ok){const j=await r.json();throw new Error(j.error)}
+  const rd=r.body.getReader(),dc=new TextDecoder();let txt="";for(;;){const{done,value}=await rd.read();if(done)break;txt+=dc.decode(value,{stream:true});hist[hist.length-1].content=txt;draw()}
+  if(txt.includes("[[ERROR]]"))throw new Error("Sorry, something went wrong.");}
+ catch(err){hist[hist.length-1].content=err.message||"Sorry, something went wrong."}
+ $("#s").disabled=false;draw()};
+</script></body></html>

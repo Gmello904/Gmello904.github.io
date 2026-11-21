@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mellow Agent</title>
+<link rel="icon" href="/logo.svg" type="image/svg+xml">
+<script>try{var t=localStorage.getItem("ma-theme")||(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light");document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="light"}</script>
+<script src="/icons.js"></script>
+<style>
+:root{--bg:#f3f6fa;--surface:#fff;--field:#fff;--ink:#0f1d2a;--muted:#5a6b7c;--line:#dfe6ee;--soft:#eef3f8;
+--brand:#0a78ad;--brand-h:#086694;--brand-ink:#fff;--brand2:#19c3ff;--dark:#0a0e13;--err:#c0392b;--ok-bg:#d9f3e4;--ok:#14633a;
+--hero1:#06121c;--hero2:#0d4766;--shadow:0 1px 2px rgba(15,29,42,.06),0 10px 28px -14px rgba(15,29,42,.18);color-scheme:light}
+[data-theme="dark"]{--bg:#0a1017;--surface:#111a24;--field:#0c141c;--ink:#e8eff6;--muted:#8fa1b4;--line:#223142;--soft:#152130;
+--brand:#2fb6ee;--brand-h:#5bc8f3;--brand-ink:#04141e;--err:#ff8a7a;--ok-bg:#12372a;--ok:#7be0a8;
+--hero1:#06121c;--hero2:#0c3b57;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -16px rgba(0,0,0,.7);color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;transition:background .25s,color .25s}
+nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:10px 20px;background:var(--dark);color:#fff;border-bottom:1px solid #16212d}
+nav>.t{font-weight:700;font-size:18px;letter-spacing:.01em}nav>.t span{color:var(--brand2)}
+nav .sp{flex:1}nav .me{font-size:14px;color:#bfe9fb;white-space:nowrap}
+nav button{background:transparent;color:#fff;border-color:#2a3a46;padding:8px 13px}
+nav button:hover{border-color:var(--brand2)}
+nav button.go{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+nav .iconbtn{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:50%}
+.pill{font-size:13px;border:1px solid #2a3a46;border-radius:99px;padding:4px 12px;color:#bfe9fb;white-space:nowrap}
+.pill.low{border-color:#e3a62b;color:#f5c75a}
+.wrap{max-width:1100px;margin:0 auto;padding:26px 20px 100px}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px;letter-spacing:-.02em}
+h2{font-size:16px;margin:0 0 10px}
+.lead{color:var(--muted);margin:0 0 22px;max-width:640px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:var(--shadow);transition:background .25s,border-color .25s}
+.hero{background:radial-gradient(circle at 85% 15%,var(--hero2),var(--hero1) 65%);color:#fff;border-radius:20px;padding:34px;margin-bottom:22px;box-shadow:var(--shadow)}
+.hero h1{color:#fff}.hero .lead{color:#b9d6e2}
+.steps{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.steps span{background:rgba(25,195,255,.14);color:#bfe9fb;border-radius:99px;padding:5px 14px;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
+.stat b{display:block;font-size:28px;line-height:1.1}.stat span{color:var(--muted);font-size:13px}
+textarea,input,select{width:100%;font:inherit;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--field);transition:border-color .15s,box-shadow .15s}
+textarea:focus,input:focus,select:focus{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent);outline:none}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.75}
+input[type=color]{padding:2px;height:42px}input[type=file]{padding:8px}
+textarea{min-height:84px;resize:vertical}
+label{display:block;font-size:13px;font-weight:600;margin:14px 0 5px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 16px;color:var(--ink);transition:border-color .15s,background .15s,transform .05s}
+button:hover{border-color:var(--brand)}button:active{transform:translateY(1px)}
+button.go{background:var(--brand);border-color:var(--brand);color:var(--brand-ink);font-weight:600}
+button.go:hover{background:var(--brand-h);border-color:var(--brand-h)}
+button.danger{color:var(--err)}
+button:disabled{opacity:.6;cursor:wait}
+:focus-visible{outline:2px solid var(--brand2);outline-offset:2px}
+.tpl{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin:14px 0}
+.tpl button{text-align:left;padding:14px;border-radius:14px;background:var(--soft)}
+.tpl .e{display:block;color:var(--brand);margin-bottom:4px}.tpl small{color:var(--muted)}
+.agents{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.ag .top{display:flex;gap:12px;align-items:center}
+.ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff;flex:none}
+.ag small{color:var(--muted)}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btns button{padding:6px 12px;font-size:14px}
+.bar{height:10px;background:var(--soft);border:1px solid var(--line);border-radius:99px;overflow:hidden;margin-top:16px}
+.fill{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand2));transition:width .25s}
+.pct{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:6px}
+.pct b{color:var(--ink);font-size:15px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+@media(max-width:860px){.grid{grid-template-columns:1fr}.hero{padding:22px}nav .pill,nav .me{display:none}}
+.tool{display:flex;gap:8px;align-items:center;font-weight:400;font-size:15px;margin:6px 0}.tool input{width:auto}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.icons{display:flex;flex-wrap:wrap;gap:8px}
+.icons button{width:44px;height:44px;padding:0;display:grid;place-items:center;border-radius:12px}
+.icons button.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+#log{height:330px;overflow-y:auto;border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:10px;background:var(--soft)}
+.b{max-width:86%;padding:8px 12px;border-radius:14px;background:var(--surface);border:1px solid var(--line);white-space:pre-wrap}
+.b.u{align-self:flex-end;background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.row{display:flex;gap:8px}.row input{flex:1}
+pre{white-space:pre-wrap;background:var(--soft);border-radius:10px;padding:12px;font-size:13px;max-height:220px;overflow:auto;margin:8px 0 0;word-break:break-all}
+code.k{display:block;background:var(--soft);border-radius:10px;padding:10px 12px;font-size:13px;word-break:break-all;margin:6px 0}
+.err{color:var(--err);margin:10px 0 0;min-height:1.2em}.hint{color:var(--muted);font-size:13px}
+.save{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding:12px 24px;display:flex;gap:12px;justify-content:flex-end;align-items:center;z-index:6}
+.tabs{display:flex;gap:6px;margin:16px 0 4px}.tabs button{flex:1}.tabs button.on{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.or{text-align:center;color:var(--muted);font-size:13px;margin:12px 0 2px}
+.modal{position:fixed;inset:0;background:rgba(4,10,16,.72);backdrop-filter:blur(3px);display:grid;place-items:center;z-index:20;padding:16px;overflow:auto}
+.modal .box{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:20px;max-width:720px;width:100%;padding:26px;box-shadow:var(--shadow)}
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:16px 0}
+.plan{border:2px solid var(--line);border-radius:16px;padding:18px;background:var(--surface)}.plan.best{border-color:var(--brand)}
+.plan .pr{font-size:30px;font-weight:700}.plan .pr small{font-size:14px;color:var(--muted);font-weight:400}
+.plan ul{padding-left:18px;margin:10px 0 14px;color:var(--muted);font-size:14px}
+.conv{border-top:1px solid var(--line);padding:8px 0;font-size:14px}.conv summary{cursor:pointer}
+.tag{display:inline-block;background:var(--ok-bg);color:var(--ok);border-radius:99px;padding:1px 10px;font-size:12px;margin-left:6px}
+.tx{margin:8px 0 0;padding:8px;background:var(--soft);border-radius:10px;white-space:pre-wrap}
+.toast{position:fixed;top:74px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:12px;z-index:30;box-shadow:var(--shadow)}
+/* Logo drawn in code and animated by animateLogo() in icons.js (plays once, then rests) */
+.alogo{display:inline-block;flex:none;width:46px;height:46px;border-radius:12px;overflow:hidden}
+.alogo.big{display:block;width:120px;height:120px;border-radius:24px;margin:0 auto 12px}
+.alogo svg{display:block;width:100%;height:100%}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:600;white-space:nowrap}
+.scroll{overflow-x:auto}
+.mini{padding:5px 8px!important;font-size:13px!important}
+.mini-in{width:70px!important;padding:5px 8px!important;font-size:13px}
+nav{flex-wrap:wrap}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<nav>
+  <button class="go" id="nav-login">Log in</button>
+  <span class="me" id="nav-me" hidden></span><button id="nav-out" hidden>Log out</button>
+  <span class="alogo" data-logo></span><span class="t">Mellow <span>Agent</span></span><span class="sp"></span>
+  <button class="iconbtn" id="theme" aria-label="Switch between dark and light" title="Dark / light"></button>
+  <span class="pill" id="pill" hidden></span>
+  <button id="nav-up" hidden>Upgrade</button>
+  <button id="nav-leads" hidden>Leads</button>
+  <button id="nav-admin" hidden>Admin</button>
+  <button id="nav-list" hidden>My agents</button>
+  <button class="go" id="nav-new">+ New agent</button>
+</nav>
+
+<div class="wrap">
+  <!-- MY AGENTS -->
+  <section id="v-list" hidden>
+    <div class="hero">
+      <h1>Build an AI agent for any business in minutes</h1>
+      <p class="lead">Describe the business in plain words. Mellow Agent writes the agent, lets you test it, and gives you a link and a website chat bubble to share.</p>
+      <div class="steps"><span>1. Describe</span><span>2. Customise</span><span>3. Test</span><span>4. Share</span></div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <div class="card" style="margin-bottom:22px"><h2>Conversations, last 14 days</h2><div id="chart"></div><p class="hint" id="topagents" style="margin:8px 0 0"></p></div>
+    <h2>Your agents</h2>
+    <div class="agents" id="agents"></div>
+    <p class="hint" id="none" hidden>No agents yet. Press “+ New agent” to build your first one.</p>
+  </section>
+
+  <!-- NEW AGENT -->
+  <section id="v-new" hidden>
+    <div class="card">
+      <h1 style="font-size:24px">New agent</h1>
+      <p class="lead" style="margin-bottom:6px">Pick a starting point or describe the business in your own words.</p>
+      <div class="tpl" id="tpl"></div>
+      <label for="desc">What does the business do, and what should the agent handle?</label>
+      <textarea id="desc" placeholder="Example: I run a clothing shop in Pretoria. I want an agent that answers questions about prices and stock and collects phone numbers from customers who want to order."></textarea>
+      <div class="row" style="margin-top:12px;align-items:center">
+        <button class="go" id="gen" style="flex:none">Create my agent</button><span class="err" id="gerr" style="margin:0"></span>
+      </div>
+      <div id="prog" hidden>
+        <div class="bar"><div class="fill" id="fill"></div></div>
+        <div class="pct"><span id="stage">Starting…</span><span><b id="num">0%</b> · <span id="secs">0s</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LEADS -->
+  <section id="v-leads" hidden>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap"><h1 style="font-size:24px;margin:0">Leads</h1><button class="go" id="leads-csv">Download CSV</button></div>
+      <p class="lead" style="margin-top:6px">People who shared a phone number or email while chatting with your agents. Open the CSV in Excel or Google Sheets.</p>
+      <div class="scroll"><table><thead><tr><th>Date</th><th>Agent</th><th>Phone</th><th>Email</th><th>First question</th></tr></thead><tbody id="leads-body"></tbody></table></div>
+      <p class="hint" id="leads-none" hidden>No leads yet. They appear here when customers share their details in a chat. Turn on “Capture leads” in an agent’s abilities.</p>
+    </div>
+  </section>
+
+  <!-- ADMIN (only for the owner of the platform) -->
+  <section id="v-admin" hidden>
+    <h1 style="font-size:24px">Admin</h1>
+    <div class="stats" id="adm-stats"></div>
+    <div class="card">
+      <h2>Users</h2>
+      <p class="hint" style="margin-top:0">Use this when a client pays by EFT or cash: give them a plan by hand.</p>
+      <div class="scroll"><table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Plan</th><th>Agents</th><th>Give plan</th></tr></thead><tbody id="adm-body"></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- EDIT AGENT -->
+  <section id="v-edit" hidden>
+    <div class="grid">
+      <div class="card">
+        <h2>Agent details</h2>
+        <div class="two">
+          <div><label for="name">Agent name</label><input id="name"></div>
+          <div><label for="business">Business</label><input id="business"></div>
+        </div>
+        <label>Icon</label><div class="icons" id="icons"></div>
+        <label for="color">Brand colour</label><input type="color" id="color" value="#0b86b8">
+        <label for="role">Job</label><textarea id="role"></textarea>
+        <label for="tone">Tone</label>
+        <select id="tone"><option>Friendly</option><option>Professional</option><option>Casual</option><option>Formal</option><option>Warm</option></select>
+        <label for="instructions">How it works</label><textarea id="instructions"></textarea>
+        <label for="knowledge">What it knows <span class="hint">(prices, hours, policies)</span></label><textarea id="knowledge" style="min-height:110px"></textarea>
+        <label for="kfile">Add a text file to its knowledge <span class="hint">(.txt, .md or .csv)</span></label><input type="file" id="kfile" accept=".txt,.md,.csv">
+        <label for="rules">Rules</label><textarea id="rules"></textarea>
+        <label for="greeting">First message</label><input id="greeting">
+        <label for="starters">Quick questions customers can tap <span class="hint">(one per line)</span></label><textarea id="starters" style="min-height:70px" placeholder="Do you deliver?&#10;What are your prices?"></textarea>
+        <label>Abilities</label>
+        <label class="tool"><input type="checkbox" id="lead"> Capture leads</label>
+        <label class="tool"><input type="checkbox" id="booking"> Take bookings</label>
+        <label class="tool"><input type="checkbox" id="handoff"> Hand over to a person</label>
+      </div>
+      <div>
+        <div class="card">
+          <h2>Test your agent</h2>
+          <div id="log" aria-live="polite"></div>
+          <div class="row"><input id="msg" placeholder="Write as a customer…" aria-label="Customer message"><button class="go" id="send">Send</button></div>
+          <p class="err" id="cerr"></p>
+          <div class="btns"><button id="restart">Restart chat</button><button id="showp">Instructions</button><button id="copyp">Copy</button><button id="dl">Backup (.json)</button></div>
+          <pre id="prompt" hidden></pre>
+        </div>
+        <div class="card" id="share" style="margin-top:20px" hidden>
+          <h2>Share this agent</h2>
+          <div class="row" style="align-items:flex-start;gap:14px">
+            <img id="qr" alt="QR code for the chat link" width="110" height="110" style="border-radius:10px;border:1px solid var(--line)">
+            <div style="flex:1;min-width:0"><p class="hint" style="margin:0">Chat link for customers:</p><code class="k" id="link"></code>
+              <div class="btns" style="margin-top:4px"><button id="open">Open chat</button><button id="copylink">Copy link</button><button id="wa">Send on WhatsApp</button></div></div>
+          </div>
+          <p class="hint" style="margin:14px 0 0">Website chat bubble. Paste this before &lt;/body&gt; on any page:</p>
+          <code class="k" id="embed"></code>
+          <div class="btns"><button id="copyembed">Copy code</button></div>
+          <p class="hint" style="margin:14px 0 0">Or download a ready-made chat page and upload it to your own website:</p>
+          <div class="btns"><button class="go" id="dlpage">Download chat page (.html)</button></div>
+          <p class="hint" style="margin:12px 0 0">Links only work on this computer until the app is put online.</p>
+        </div>
+        <div class="card" id="convs" style="margin-top:20px" hidden>
+          <h2>Customer conversations and leads</h2>
+          <div id="clist"><span class="hint">No conversations yet.</span></div>
+          <div class="btns"><button id="crefresh">Refresh</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="save">
+      <span class="hint" id="saved"></span>
+      <button class="danger" id="del" hidden>Delete agent</button>
+      <button class="go" id="save">Save agent</button>
+    </div>
+  </section>
+</div>
+
+<!-- LOGIN POP-UP -->
+<div class="modal" id="login" hidden>
+  <div class="box" style="max-width:420px">
+    <span class="alogo big" data-logo></span>
+    <h1 id="login-t" style="font-size:24px;text-align:center">Log in to continue</h1>
+    <p class="lead" id="login-s" style="text-align:center;margin:0 auto 6px"></p>
+    <div id="pane-auth">
+      <div id="g-wrap" hidden><div id="g-btn" style="display:flex;justify-content:center;min-height:44px"></div><div class="or">or use your email</div></div>
+      <div class="tabs"><button id="tab-in" class="on">Log in</button><button id="tab-up">Create account</button></div>
+      <div id="f-name" hidden><label for="a-name">Your name</label><input id="a-name" autocomplete="name"></div>
+      <div id="f-phone" hidden><label for="a-phone">Mobile number <span class="hint">(we text you an activation code)</span></label><input id="a-phone" type="tel" placeholder="082 123 4567" autocomplete="tel"></div>
+      <label for="a-email">Email</label><input id="a-email" type="email" autocomplete="email">
+      <label for="a-pass">Password <span class="hint">(8 characters or more)</span></label><input id="a-pass" type="password" autocomplete="current-password">
+      <p class="err" id="a-err"></p>
+      <button class="go" id="a-go" style="width:100%">Log in</button>
+    </div>
+    <div id="pane-phone" hidden>
+      <label for="p-num">Mobile number</label><input id="p-num" type="tel" placeholder="082 123 4567" autocomplete="tel">
+      <p class="err" id="p-err"></p>
+      <button class="go" id="p-send" style="width:100%">Send my code</button>
+    </div>
+    <div id="pane-code" hidden>
+      <label for="c-code">6-digit code sent to <b id="c-to"></b></label>
+      <input id="c-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="123456" style="font-size:22px;letter-spacing:6px;text-align:center">
+      <p class="hint" id="c-test" hidden>Test mode: no real SMS is sent. The code is printed in the terminal window where the app runs.</p>
+      <p class="err" id="c-err"></p>
+      <button class="go" id="c-go" style="width:100%">Activate my account</button>
+      <div class="btns" style="justify-content:center"><button id="c-resend">Send a new code</button><button id="c-change">Change number</button></div>
+    </div>
+    <div class="btns" style="justify-content:center"><button id="login-close">Not now</button></div>
+  </div>
+</div>
+
+<!-- PAYMENT BOX -->
+<div class="modal" id="pay" hidden>
+  <div class="box">
+    <h1 id="pay-t" style="font-size:24px">Choose your plan</h1>
+    <p class="lead" id="pay-s" style="margin-bottom:0"></p>
+    <div class="plans" id="plans"></div>
+    <p class="err" id="pay-err"></p>
+    <div class="btns" style="margin-top:0"><button id="pay-close">Not now</button><button id="pay-out">Log out</button></div>
+    <p class="hint" id="pay-note" style="margin-bottom:0"></p>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const FIELDS = ["name", "business", "role", "tone", "instructions", "knowledge", "rules", "greeting", "starters", "color"];
+const TOOLS = ["lead", "booking", "handoff"];
+const ICON_NAMES = ["chat", "bag", "heart", "megaphone", "cafe", "home", "cap", "zap", "user", "briefcase"];
+const TEMPLATES = [
+  ["bag", "Shop assistant", "Prices, stock, orders", "I run a retail shop. I want an agent that answers questions about prices and stock, suggests products, and collects phone numbers from customers who want to order."],
+  ["heart", "Clinic bookings", "Treatments, appointments", "We run a clinic open Mon–Sat 8:00–17:00. I want an agent that answers questions about treatments and books appointments."],
+  ["megaphone", "Marketing agency", "Find leads, explain packages", "We are a small marketing agency. I want an agent that talks to business owners, finds out what they sell and their budget, explains our packages, and collects their contact details."],
+  ["cafe", "Restaurant", "Menu, tables, allergies", "We own a restaurant. I want an agent that shares the menu and opening hours, takes table bookings, and answers questions about allergies."],
+  ["home", "Property agent", "Listings, viewings", "I am an estate agent. I want an agent that answers questions about listings, asks buyers for their budget and area, and books viewings."],
+  ["cap", "Tutoring centre", "Subjects, fees, sign-up", "We run a tutoring centre for maths and science. I want an agent that explains our packages and prices, and signs parents up for a free first lesson."]
+];
+let me = null, B = null, PLANS = {}, MODE = "test", agents = [], cur = null, curIcon = "chat", history = [], busy = false, authMode = "in", G = null, pending = null, CFG = {};
+
+/* ---------- logo (code, not an image) ---------- */
+document.querySelectorAll("[data-logo]").forEach((e, i) => { e.innerHTML = logoSVG("n" + i); animateLogo(e); e.addEventListener("mouseenter", () => animateLogo(e)); });
+
+/* ---------- dark / light ---------- */
+function applyTheme(t, save) {
+  document.documentElement.dataset.theme = t; $("#theme").innerHTML = icon(t === "dark" ? "sun" : "moon", 20);
+  if (save) { try { localStorage.setItem("ma-theme", t); } catch (e) {} }
+}
+applyTheme(document.documentElement.dataset.theme || "light");
+$("#theme").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark", true);
+
+/* ---------- helpers ---------- */
+const views = ["list", "new", "edit", "leads", "admin"];
+const view = (v) => { views.forEach((x) => ($("#v-" + x).hidden = x !== v)); window.scrollTo(0, 0); };
+const toast = (t) => { $("#toast").textContent = t; $("#toast").hidden = false; setTimeout(() => ($("#toast").hidden = true), 3500); };
+async function api(url, body, method) {
+  const r = await fetch(url, { method: method || (body ? "POST" : "GET"), headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+  let data = {}; try { data = await r.json(); } catch (e) {}
+  if (r.status === 401) {
+    if (data.needLogin) showLogin(data.error);
+    else if (me) { me = null; B = null; paintNav(); showLogin("Your session ended. Please log in again."); }
+  }
+  if (r.status === 403 && data.needPhone) showPhone(data.error);
+  if (r.status === 402) { if (data.locked) { if (B) B.locked = true; showPay(true); } else showPay(false, data.error); }
+  if (!r.ok) throw new Error(data.error || "Request failed");
+  return data;
+}
+async function streamPost(url, body, onText) {
+  const r = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const left = r.headers.get("X-Guest-Left");
+  if (left !== null && !me && G) { G.left = +left; paintPill(); }
+  if (!r.ok) {
+    let d = {}; try { d = await r.json(); } catch (e) {}
+    if (r.status === 401 && d.needLogin) { if (!me && G) { G.left = 0; paintPill(); } showLogin(d.error); }
+    else if (r.status === 403 && d.needPhone) showPhone(d.error);
+    else if (r.status === 402) { if (B) B.locked = true; showPay(true); }
+    throw new Error(d.error || "Request failed");
+  }
+  const rd = r.body.getReader(), dec = new TextDecoder(); let text = "";
+  for (;;) { const { done, value } = await rd.read(); if (done) break; text += dec.decode(value, { stream: true }); onText(text); }
+  const i = text.indexOf("[[ERROR]]"); if (i >= 0) throw new Error(text.slice(i + 9).trim() || "The reply was cut off");
+  return text;
+}
+async function saveFile(url, name) {
+  try {
+    const r = await fetch(url); if (!r.ok) { let d = {}; try { d = await r.json(); } catch (e) {} throw new Error(d.error || "Download failed"); }
+    const l = document.createElement("a"); l.href = URL.createObjectURL(await r.blob()); l.download = name; l.click();
+  } catch (e) { toast(e.message); }
+}
+const copy = async (btn, text) => { try { await navigator.clipboard.writeText(text); const o = btn.textContent; btn.textContent = "Copied"; setTimeout(() => (btn.textContent = o), 1400); } catch (e) {} };
+
+/* ---------- login (a pop-up; the app itself stays open) ---------- */
+function setAuthMode(m) {
+  authMode = m; $("#tab-in").className = m === "in" ? "on" : ""; $("#tab-up").className = m === "up" ? "on" : "";
+  $("#f-name").hidden = m !== "up"; $("#f-phone").hidden = m !== "up"; $("#a-go").textContent = m === "in" ? "Log in" : "Create my free account"; $("#a-err").textContent = "";
+  $("#a-pass").autocomplete = m === "in" ? "current-password" : "new-password";
+}
+function setPane(p) { ["auth", "phone", "code"].forEach((x) => ($("#pane-" + x).hidden = x !== p)); }
+function openLogin() { $("#login").hidden = false; $("#pay").hidden = true; animateLogo($("#login .alogo")); }
+function showLogin(msg, mode) {
+  setPane("auth"); $("#login-t").textContent = "Log in to continue"; setAuthMode(mode || "in");
+  $("#login-s").textContent = msg || "Log in or create a free account to save and share your agents."; openLogin();
+}
+function showPhone(msg) {
+  setPane("phone"); $("#login-t").textContent = "Activate your account"; $("#p-err").textContent = "";
+  $("#login-s").textContent = msg || "Enter your mobile number. We will text you a 6-digit code."; openLogin();
+}
+function showCode(masked) {
+  setPane("code"); $("#login-t").textContent = "Enter your code"; $("#c-err").textContent = ""; $("#c-code").value = "";
+  $("#login-s").textContent = "We sent an activation code by SMS."; $("#c-to").textContent = masked || "your phone";
+  $("#c-test").hidden = CFG.smsMode !== "test"; openLogin(); setTimeout(() => $("#c-code").focus(), 50);
+}
+const runPending = () => { if (pending) { const f = pending; pending = null; f(); } };
+async function afterAuth(d) { // after any login, sign-up or Google sign-in
+  await enter(d.user, true);
+  if (CFG.requirePhone && !d.user.phoneVerified) { if (d.codeSent) showCode(d.user.phone); else showPhone(d.sendError); return; }
+  closeLogin(); runPending();
+}
+const closeLogin = () => { $("#login").hidden = true; };
+$("#tab-in").onclick = () => setAuthMode("in"); $("#tab-up").onclick = () => setAuthMode("up");
+$("#login-close").onclick = () => { pending = null; closeLogin(); };
+$("#nav-login").onclick = () => showLogin();
+$("#a-go").onclick = async () => {
+  $("#a-err").textContent = ""; $("#a-go").disabled = true;
+  try { await afterAuth(await api(authMode === "in" ? "/api/login" : "/api/signup", { name: $("#a-name").value, email: $("#a-email").value, password: $("#a-pass").value, phone: $("#a-phone").value })); }
+  catch (e) { $("#a-err").textContent = e.message; }
+  $("#a-go").disabled = false;
+};
+$("#p-send").onclick = async () => {
+  $("#p-err").textContent = ""; $("#p-send").disabled = true;
+  try { const r = await api("/api/phone/send", { phone: $("#p-num").value }); showCode(r.phone); } catch (e) { $("#p-err").textContent = e.message; }
+  $("#p-send").disabled = false;
+};
+$("#c-go").onclick = async () => {
+  $("#c-err").textContent = ""; $("#c-go").disabled = true;
+  try { const d = await api("/api/phone/verify", { code: $("#c-code").value }); me = d.user; B = d.billing; paintNav(); closeLogin(); toast("Account activated. Welcome!"); runPending(); }
+  catch (e) { $("#c-err").textContent = e.message; }
+  $("#c-go").disabled = false;
+};
+$("#c-resend").onclick = async () => { $("#c-err").textContent = ""; try { const r = await api("/api/phone/send", {}); toast("New code sent to " + r.phone); } catch (e) { $("#c-err").textContent = e.message; } };
+$("#c-change").onclick = () => showPhone();
+$("#c-code").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#c-go").click(); });
+$("#p-num").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#p-send").click(); });
+function initGoogle() { // shows the Google button when GOOGLE_CLIENT_ID is set on the server
+  if (!CFG.googleClientId || window._gInit) return; window._gInit = true;
+  const s = document.createElement("script"); s.src = "https://accounts.google.com/gsi/client"; s.async = true;
+  s.onload = () => {
+    google.accounts.id.initialize({ client_id: CFG.googleClientId, callback: onGoogle });
+    google.accounts.id.renderButton($("#g-btn"), { theme: "outline", size: "large", width: 340, text: "continue_with" }); $("#g-wrap").hidden = false;
+  };
+  document.head.appendChild(s);
+}
+async function onGoogle(resp) { $("#a-err").textContent = ""; try { await afterAuth(await api("/api/google", { credential: resp.credential })); } catch (e) { $("#a-err").textContent = e.message; } }
+$("#a-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") $("#a-go").click(); });
+function paintNav() {
+  const li = !!me;
+  $("#nav-login").hidden = li; $("#nav-me").hidden = !li; $("#nav-out").hidden = !li; $("#nav-up").hidden = !li; $("#nav-list").hidden = !li; $("#nav-leads").hidden = !li; $("#nav-admin").hidden = !(li && me.admin);
+  if (li) $("#nav-me").textContent = "Hi, " + me.name;
+  paintPill();
+}
+async function enter(user, stay) {
+  me = user; const d = await api("/api/me"); B = d.billing; PLANS = d.plans; MODE = d.mode; CFG = d.config || CFG; G = null;
+  paintNav(); await loadList(); if (!stay) view("list");
+  if (new URLSearchParams(location.search).get("paid") === "1") { toast("Thank you! Your payment is being confirmed."); setTimeout(refreshBilling, 4000); window.history.replaceState({}, "", "/"); }
+}
+async function logout() { await api("/api/logout", {}); me = null; B = null; $("#pay").hidden = true; const d = await api("/api/me"); G = d.guest; paintNav(); view("new"); }
+$("#nav-out").onclick = logout; $("#pay-out").onclick = logout;
+
+/* ---------- trial timer and payment box ---------- */
+const fmt = (ms) => Math.floor(ms / 60000) + ":" + String(Math.floor((ms % 60000) / 1000)).padStart(2, "0");
+function paintPill() {
+  const p = $("#pill"); p.classList.remove("low");
+  if (!me) {
+    if (!G) { p.hidden = true; return; }
+    p.hidden = false; p.textContent = "Free tries left: " + G.left + " of " + G.limit; if (G.left <= 1) p.classList.add("low"); return;
+  }
+  p.hidden = false;
+  if (B.paid) { p.textContent = PLANS[B.plan].name + " plan · until " + new Date(B.paidUntil).toLocaleDateString(); $("#nav-up").textContent = "Manage plan"; }
+  else if (B.locked) { p.textContent = "Free trial ended"; p.classList.add("low"); $("#nav-up").textContent = "Upgrade"; }
+  else { p.textContent = "Free trial · " + fmt(B.trialLeftMs) + " left"; if (B.trialLeftMs < 60000) p.classList.add("low"); $("#nav-up").textContent = "Upgrade"; }
+}
+async function refreshBilling() { try { B = (await api("/api/me")).billing; paintPill(); } catch (e) {} }
+setInterval(() => { // local countdown, once a second, only while the person is looking at the page
+  if (!me || !B || B.paid || B.locked || document.hidden) return;
+  B.trialLeftMs = Math.max(0, B.trialLeftMs - 1000); paintPill();
+  if (B.trialLeftMs === 0) { B.locked = true; paintPill(); showPay(true); }
+}, 1000);
+setInterval(async () => { // tells the server how long the app has been in use
+  if (!me || !B || B.paid || document.hidden) return;
+  try { const b = await api("/api/heartbeat", {}); B = b; paintPill(); if (b.locked) showPay(true); } catch (e) {}
+}, 15000);
+
+function showPay(locked, message) {
+  $("#pay-t").textContent = locked ? "Your free trial has ended" : (B && B.paid ? "Manage your plan" : "Choose your plan");
+  $("#pay-s").textContent = message || (locked ? "Pick a plan to keep building and sharing your agents. Your agents are saved and waiting." : "Pick the plan that fits your business.");
+  $("#pay-close").hidden = !!locked; $("#pay-err").textContent = "";
+  $("#pay-note").textContent = MODE === "test" ? "Test mode: no real money is taken. Plans activate straight away." : "Secure payment by PayFast. Plans last 30 days.";
+  const el = $("#plans"); el.innerHTML = "";
+  Object.entries(PLANS).forEach(([id, p]) => {
+    const d = document.createElement("div"); d.className = "plan" + (id === "business" ? " best" : "");
+    d.innerHTML = '<b></b><div class="pr"></div><ul></ul><button class="go" style="width:100%"></button>';
+    d.querySelector("b").textContent = p.name; d.querySelector(".pr").innerHTML = "R" + p.price + " <small>/ 30 days</small>";
+    p.features.forEach((f) => { const li = document.createElement("li"); li.textContent = f; d.querySelector("ul").appendChild(li); });
+    const btn = d.querySelector("button"); btn.textContent = "Choose " + p.name; btn.onclick = () => pay(id, btn);
+    el.appendChild(d);
+  });
+  $("#pay").hidden = false;
+}
+$("#pay-close").onclick = () => ($("#pay").hidden = true);
+$("#nav-up").onclick = () => showPay(false);
+async function pay(plan, btn) {
+  btn.disabled = true; $("#pay-err").textContent = "";
+  try {
+    const d = await api("/api/pay", { plan });
+    if (d.activated) { B = d.billing; paintPill(); $("#pay").hidden = true; toast("Plan activated. Thank you!"); return; }
+    const f = document.createElement("form"); f.method = "POST"; f.action = d.action;
+    Object.entries(d.fields).forEach(([k, v]) => { const i = document.createElement("input"); i.type = "hidden"; i.name = k; i.value = v; f.appendChild(i); });
+    document.body.appendChild(f); f.submit();
+  } catch (e) { $("#pay-err").textContent = e.message; }
+  btn.disabled = false;
+}
+
+/* ---------- dashboard chart ---------- */
+async function loadChart() {
+  try {
+    const d = await api("/api/analytics"), W = 700, H = 150, n = d.days.length, bw = W / n, max = Math.max(1, ...d.days.map((x) => x.conversations));
+    let svg = '<svg viewBox="0 0 ' + W + " " + (H + 22) + '" width="100%" role="img" aria-label="Conversations per day">';
+    d.days.forEach((x, i) => {
+      const bh = Math.round((x.conversations / max) * (H - 18)), lh = Math.round((x.leads / max) * (H - 18)), bx = i * bw + 6;
+      svg += '<g><title>' + x.date + ": " + x.conversations + " conversations, " + x.leads + " leads</title>" +
+        '<rect x="' + bx + '" y="' + (H - bh) + '" width="' + (bw - 12) + '" height="' + Math.max(bh, 2) + '" rx="4" fill="var(--brand)" opacity="' + (x.conversations ? 1 : .25) + '"/>' +
+        (lh ? '<rect x="' + bx + '" y="' + (H - lh) + '" width="' + (bw - 12) + '" height="' + lh + '" rx="4" fill="var(--brand2)"/>' : "") +
+        (x.conversations ? '<text x="' + (bx + (bw - 12) / 2) + '" y="' + (H - bh - 5) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + x.conversations + "</text>" : "") +
+        ((n - 1 - i) % 2 === 0 ? '<text x="' + (bx + (bw - 12) / 2) + '" y="' + (H + 16) + '" text-anchor="middle" font-size="11" fill="var(--muted)">' + x.date.slice(8) + "/" + x.date.slice(5, 7) + "</text>" : "") + "</g>";
+    });
+    $("#chart").innerHTML = svg + "</svg>";
+    const total = d.days.reduce((a, x) => a + x.conversations, 0), leads = d.days.reduce((a, x) => a + x.leads, 0);
+    $("#topagents").textContent = total ? total + " conversations and " + leads + " leads in the last 14 days (light blue = leads)." + (d.perAgent[0] ? " Busiest agent: " + d.perAgent[0].name + "." : "") : "No conversations yet. Share an agent’s link or chat bubble and they will appear here.";
+  } catch (e) {}
+}
+
+/* ---------- list ---------- */
+async function loadList() {
+  agents = await api("/api/agents");
+  const st = await api("/api/stats");
+  $("#stats").innerHTML = ""; [["Agents", st.agents], ["Conversations", st.conversations], ["Leads captured", st.leads], ["Messages", st.messages]].forEach(([l, n]) => {
+    const d = document.createElement("div"); d.className = "card stat"; d.innerHTML = "<b></b><span></span>"; d.querySelector("b").textContent = n; d.querySelector("span").textContent = l; $("#stats").appendChild(d);
+  });
+  loadChart();
+  const el = $("#agents"); el.innerHTML = ""; $("#none").hidden = agents.length > 0;
+  agents.forEach((a) => {
+    const d = document.createElement("div"); d.className = "card ag";
+    d.innerHTML = '<div class="top"><div class="ic"></div><div><b class="n"></b><br><small class="bz"></small></div></div><div class="btns"><button class="e">Edit</button><button class="o">Open chat</button><button class="c">Duplicate</button></div>';
+    const ic = d.querySelector(".ic"); ic.style.background = a.color || "#0b86b8"; ic.innerHTML = icon(a.icon || "chat", 24);
+    d.querySelector(".n").textContent = a.name || "Untitled"; d.querySelector(".bz").textContent = a.business || "";
+    d.querySelector(".e").onclick = () => edit(a); d.querySelector(".o").onclick = () => window.open("/chat/" + a.id, "_blank");
+    d.querySelector(".c").onclick = async () => { try { await api("/api/agents", { ...a, id: undefined, name: (a.name || "Agent") + " copy" }); await loadList(); toast("Agent duplicated"); } catch (e) { toast(e.message); } };
+    el.appendChild(d);
+  });
+}
+$("#nav-list").onclick = async () => { await loadList(); view("list"); };
+$("#nav-new").onclick = () => { $("#prog").hidden = true; $("#gerr").textContent = ""; view("new"); };
+
+TEMPLATES.forEach(([ic, t, s, d]) => {
+  const b = document.createElement("button"); b.innerHTML = '<span class="e">' + icon(ic, 26) + "</span><b></b><br><small></small>";
+  b.querySelector("b").textContent = t; b.querySelector("small").textContent = s;
+  b.onclick = () => { $("#desc").value = d; $("#desc").focus(); }; $("#tpl").appendChild(b);
+});
+
+/* ---------- leads ---------- */
+$("#nav-leads").onclick = async () => {
+  const rows = await api("/api/leads"), body = $("#leads-body"); body.innerHTML = ""; $("#leads-none").hidden = rows.length > 0;
+  rows.forEach((r) => { const tr = document.createElement("tr");
+    [new Date(r.date).toLocaleString(), r.agent, r.phone, r.email, r.asked].forEach((v) => { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); }); body.appendChild(tr); });
+  view("leads");
+};
+$("#leads-csv").onclick = () => saveFile("/api/leads.csv", "leads.csv");
+
+/* ---------- admin (owner only) ---------- */
+$("#nav-admin").onclick = async () => { await loadAdmin(); view("admin"); };
+async function loadAdmin() {
+  const d = await api("/api/admin/overview");
+  $("#adm-stats").innerHTML = ""; [["Users", d.stats.users], ["Activated", d.stats.activated], ["Paying now", d.stats.paid], ["Monthly income", "R" + d.stats.monthly], ["Agents", d.stats.agents], ["Conversations", d.stats.conversations]].forEach(([l, n]) => {
+    const c = document.createElement("div"); c.className = "card stat"; c.innerHTML = "<b></b><span></span>"; c.querySelector("b").textContent = n; c.querySelector("span").textContent = l; $("#adm-stats").appendChild(c); });
+  const body = $("#adm-body"); body.innerHTML = "";
+  d.users.forEach((u) => {
+    const tr = document.createElement("tr");
+    [u.name, u.email, u.phoneVerified ? "Verified" : "Not verified", u.plan ? PLANS[u.plan].name + " until " + new Date(u.paidUntil).toLocaleDateString() : "Free", u.agents].forEach((v) => { const td = document.createElement("td"); td.textContent = v; tr.appendChild(td); });
+    const td = document.createElement("td"); td.style.whiteSpace = "nowrap";
+    td.innerHTML = '<select class="mini mini-in" style="width:110px!important"></select> <input class="mini-in" type="number" min="1" max="366" value="30" aria-label="Days"> <button class="mini go">Give</button> <button class="mini danger">Remove</button>';
+    const sel = td.querySelector("select"); Object.entries(PLANS).forEach(([id, p]) => { const o = document.createElement("option"); o.value = id; o.textContent = p.name; sel.appendChild(o); });
+    const act = async (plan) => { try { await api("/api/admin/grant", { userId: u.id, plan, days: td.querySelector("input").value }); toast("Done"); loadAdmin(); } catch (e) { toast(e.message); } };
+    td.querySelector(".go").onclick = () => act(sel.value); td.querySelector(".danger").onclick = () => act("none");
+    tr.appendChild(td); body.appendChild(tr);
+  });
+}
+
+/* ---------- create with progress ---------- */
+$("#gen").onclick = async () => {
+  if (busy) return;
+  const description = $("#desc").value.trim();
+  if (!description) { $("#gerr").textContent = "Describe the business or pick a template first."; return; }
+  busy = true; $("#gerr").textContent = ""; $("#gen").disabled = true; $("#gen").textContent = "Creating…"; $("#prog").hidden = false;
+  const t0 = Date.now(); let pct = 0, started = false;
+  const set = (p, l) => { pct = Math.max(pct, Math.min(100, p)); $("#fill").style.width = pct + "%"; $("#num").textContent = Math.round(pct) + "%"; if (l) $("#stage").textContent = l; };
+  set(2, "Contacting the AI…");
+  const timer = setInterval(() => { $("#secs").textContent = Math.round((Date.now() - t0) / 1000) + "s"; if (!started) set(pct + (pct < 14 ? 0.5 : 0.05), pct < 14 ? "Contacting the AI…" : "Waiting for the AI…"); }, 200);
+  try {
+    const text = await streamPost("/api/generate", { description }, (t) => {
+      started = true; const p = 15 + Math.min(t.length / 1100, 1) * 78;
+      set(p, p < 45 ? "Designing your agent…" : p < 75 ? "Writing instructions…" : "Adding rules and abilities…");
+    });
+    set(97, "Finishing…");
+    const a = JSON.parse(text.replace(/```json|```/g, "").trim()); a.icon = TEMPLATES.find((t) => description === t[3]) ? TEMPLATES.find((t) => description === t[3])[0] : "chat"; a.color = "#0b86b8";
+    set(100, "Done"); edit(a);
+  } catch (e) { $("#gerr").textContent = e instanceof SyntaxError ? "The answer was incomplete. Please try again." : e.message; $("#prog").hidden = true; }
+  clearInterval(timer); busy = false; $("#gen").disabled = false; $("#gen").textContent = "Create my agent";
+};
+
+/* ---------- edit ---------- */
+const read = () => {
+  const a = { id: cur && cur.id, tools: {}, icon: curIcon };
+  FIELDS.forEach((k) => (a[k] = $("#" + k).value)); TOOLS.forEach((k) => (a.tools[k] = $("#" + k).checked));
+  return a;
+};
+function paintIcons() {
+  const el = $("#icons"); el.innerHTML = "";
+  ICON_NAMES.forEach((n) => { const b = document.createElement("button"); b.type = "button"; b.innerHTML = icon(n, 22); b.setAttribute("aria-label", n); b.className = n === curIcon ? "on" : ""; b.onclick = () => { curIcon = n; paintIcons(); }; el.appendChild(b); });
+}
+function edit(a) {
+  cur = a; history = []; curIcon = a.icon || "chat";
+  FIELDS.forEach((k) => ($("#" + k).value = a[k] || (k === "color" ? "#0b86b8" : "")));
+  TOOLS.forEach((k) => ($("#" + k).checked = !!(a.tools && a.tools[k])));
+  $("#prompt").hidden = true; $("#saved").textContent = a.id ? "" : "Not saved yet"; $("#del").hidden = !a.id;
+  paintIcons(); shareCard(); draw(); view("edit"); if (a.id) loadChats();
+}
+function shareCard() {
+  const on = !!(cur && cur.id); $("#share").hidden = !on; $("#convs").hidden = !on; if (!on) return;
+  const link = location.origin + "/chat/" + cur.id;
+  $("#link").textContent = link; $("#qr").src = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(link);
+  $("#embed").textContent = '<script src="' + location.origin + '/widget.js" data-agent="' + cur.id + '"><\/script>';
+}
+async function loadChats() {
+  try {
+    const list = await api("/api/agents/" + cur.id + "/chats"), el = $("#clist"); el.innerHTML = "";
+    if (!list.length) { el.innerHTML = '<span class="hint">No conversations yet. They appear here when customers use your link or chat bubble.</span>'; return; }
+    list.forEach((c) => {
+      const d = document.createElement("details"); d.className = "conv";
+      const first = (c.messages.find((m) => m.role === "user") || {}).content || "(no message)";
+      d.innerHTML = "<summary></summary><div class='tx'></div>";
+      const s = d.querySelector("summary"); s.textContent = new Date(c.updatedAt).toLocaleString() + " · " + first.slice(0, 50);
+      if (c.lead && (c.lead.phone || c.lead.email)) { const t = document.createElement("span"); t.className = "tag"; t.textContent = "Lead: " + [c.lead.phone, c.lead.email].filter(Boolean).join(" ") ; s.appendChild(t); }
+      d.querySelector(".tx").textContent = c.messages.map((m) => (m.role === "user" ? "Customer: " : "Agent: ") + m.content).join("\n\n");
+      el.appendChild(d);
+    });
+  } catch (e) {}
+}
+$("#crefresh").onclick = loadChats;
+$("#copylink").onclick = (e) => copy(e.target, $("#link").textContent);
+$("#copyembed").onclick = (e) => copy(e.target, $("#embed").textContent);
+$("#open").onclick = () => window.open("/chat/" + cur.id, "_blank");
+$("#wa").onclick = () => window.open("https://wa.me/?text=" + encodeURIComponent("Chat with us here: " + $("#link").textContent), "_blank");
+$("#kfile").onchange = (e) => {
+  const f = e.target.files[0]; if (!f) return; const r = new FileReader();
+  r.onload = () => { $("#knowledge").value = ($("#knowledge").value + "\n" + String(r.result).slice(0, 8000)).trim(); toast("File added to knowledge"); e.target.value = ""; };
+  r.readAsText(f);
+};
+$("#save").onclick = async () => {
+  if (!me) { pending = () => $("#save").click(); showLogin("Log in to save and share your agent. Your work here will be kept."); return; }
+  $("#save").disabled = true;
+  try { cur = await api("/api/agents", read()); $("#saved").textContent = "Saved ✓"; $("#del").hidden = false; shareCard(); loadChats(); }
+  catch (e) { $("#saved").textContent = e.message; }
+  $("#save").disabled = false;
+};
+$("#del").onclick = async () => { if (!confirm("Delete this agent and its conversations?")) return; await api("/api/agents/" + cur.id, null, "DELETE"); await loadList(); view("list"); };
+
+/* ---------- test chat ---------- */
+function draw() {
+  const log = $("#log"); log.innerHTML = "";
+  [{ role: "assistant", content: $("#greeting").value || "Hello!" }, ...history].forEach((m) => { const d = document.createElement("div"); d.className = "b" + (m.role === "user" ? " u" : ""); d.textContent = m.content || "…"; log.appendChild(d); });
+  log.scrollTop = log.scrollHeight;
+}
+async function send() {
+  const t = $("#msg").value.trim(); if (!t || $("#send").disabled) return;
+  $("#msg").value = ""; $("#cerr").textContent = ""; history.push({ role: "user", content: t }, { role: "assistant", content: "" }); draw(); $("#send").disabled = true;
+  try {
+    const reply = await streamPost("/api/chat", { agent: read(), messages: history.slice(0, -1) }, (x) => { history[history.length - 1].content = x; draw(); });
+    history[history.length - 1].content = reply;
+  } catch (e) { history.splice(-2, 2); $("#cerr").textContent = e.message; }
+  $("#send").disabled = false; draw();
+}
+$("#send").onclick = send; $("#msg").addEventListener("keydown", (e) => { if (e.key === "Enter") send(); });
+$("#greeting").addEventListener("input", draw); $("#restart").onclick = () => { history = []; draw(); };
+async function showPrompt() { const { prompt } = await api("/api/prompt", { agent: read() }); $("#prompt").textContent = prompt; $("#prompt").hidden = false; return prompt; }
+$("#showp").onclick = showPrompt; $("#copyp").onclick = async (e) => copy(e.target, await showPrompt());
+$("#dlpage").onclick = async () => {
+  if (!cur || !cur.id) { toast("Save the agent first"); return; }
+  try {
+    const r = await fetch("/api/agents/" + cur.id + "/download");
+    if (!r.ok) { let d = {}; try { d = await r.json(); } catch (e) {} if (d.needPhone) showPhone(d.error); else if (d.needLogin) showLogin(d.error); throw new Error(d.error || "Download failed"); }
+    const l = document.createElement("a"); l.href = URL.createObjectURL(await r.blob());
+    l.download = ((cur.name || "agent").replace(/\W+/g, "-").toLowerCase() || "agent") + "-chat.html"; l.click(); toast("Chat page downloaded");
+  } catch (e) { toast(e.message); }
+};
+$("#dl").onclick = () => { const a = read(), l = document.createElement("a"); l.href = URL.createObjectURL(new Blob([JSON.stringify(a, null, 2)], { type: "application/json" })); l.download = (a.name || "agent").replace(/\W+/g, "-").toLowerCase() + ".json"; l.click(); };
+
+/* ---------- start: the app opens straight away, no login needed ---------- */
+(async () => {
+  try {
+    const d = await api("/api/me"); PLANS = d.plans; MODE = d.mode; CFG = d.config || {}; initGoogle();
+    if (d.user) await enter(d.user); else { G = d.guest; paintNav(); view("new"); }
+  } catch (e) { paintNav(); view("new"); }
+})();
+</script>
+</body>
+</html>
